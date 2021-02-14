@@ -98,3 +98,26 @@ exports.getStoresByTag = async (req, res) => {
     const [tags, stores] = await Promise.all([tagsPromise, storesPromise])
     res.render('tags', {tags, title: 'Tags', tag, stores});
 }
+
+
+
+
+exports.searchStores = async (req, res) => {
+    const stores = await Store
+    // find store that match the search query
+    .find({
+        $text: {
+            $search: req.query.q
+        }
+    }, {
+        // gives them a score on valid they are (search for coffee where the word coffee is present multiple times in the text receives a heigher score)
+        score: { $meta: 'textScore'}
+    })
+    // sort them on the matching score
+    .sort({
+        score: { $meta: 'textScore'}
+    })
+    // limit to only 5 results
+    .limit(5);
+    res.json(stores);
+}
