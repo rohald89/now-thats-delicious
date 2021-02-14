@@ -138,7 +138,11 @@ exports.mapStores = async (req, res) => {
     }
     const stores = await Store
         .find(q) // find all stores that fit the query. 
-        .select('slug name description location') // only select certain properties to return (we don't need the author on this one for example)
+        .select('slug name description location photo') // only select certain properties to return (we don't need the author on this one for example)
         .limit(10); // return a maximum of 10 points to avoid having to many pins on the map
     res.json( stores )
+}
+
+exports.mapPage = (req, res) => {
+    res.render('map', {title: 'Map'});
 }
