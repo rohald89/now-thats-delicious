@@ -32,7 +32,12 @@ const storeSchema = new mongoose.Schema({
             required: "You must supply an address!"
         }
     },
-    photo: String
+    photo: String,
+    author: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: 'You must supply an author'
+    }
 });
 
 storeSchema.pre('save', async function(next) {
@@ -72,7 +77,7 @@ storeSchema.statics.getTagsList = function() {
         // Video 21: Custom MongoDB Aggregations 
         { $unwind: '$tags'}, // unwind based on tags. If a store had 3 different tags it'll show up 3 times (1 time for every single tag)
         { $group: { _id: '$tags', count: { $sum: 1 }}}, // group those stores together if they have the same tag. result will be an object with an _id: <TAGNAME>. count is the number of restaurants that have that specific tag.
-        { $sort: { count: -1 }} // sort the results on the value of <COUNT> give it value 1 for Ascending list and -1 for Descending
+        { $sort: { count: -1, _id: 1 }} // sort the results on the value of <COUNT> give it value 1 for Ascending list and -1 for Descending // added _id aswell so tags stay on the same place after selecting one. Now it sorts based on the number of stores but if they got the same number it'll take the id and sort that on alphabet
     ]);
 };
 
