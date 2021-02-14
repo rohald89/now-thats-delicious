@@ -121,3 +121,24 @@ exports.searchStores = async (req, res) => {
     .limit(5);
     res.json(stores);
 }
+
+exports.mapStores = async (req, res) => {
+    const coordinates = [req.query.lng, req.query.lat] // searched coordinates from the query
+        .map(parseFloat) // map over the array and turn them into numbers
+    const q = {
+        location: {
+            $near: {
+                $geometry: {
+                    type: 'Point',
+                    coordinates
+                },
+                $maxDistance: 10000 // 10km
+            }
+        }
+    }
+    const stores = await Store
+        .find(q) // find all stores that fit the query. 
+        .select('slug name description location') // only select certain properties to return (we don't need the author on this one for example)
+        .limit(10); // return a maximum of 10 points to avoid having to many pins on the map
+    res.json( stores )
+}

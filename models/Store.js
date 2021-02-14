@@ -46,6 +46,10 @@ storeSchema.index({
     description: 'text'
 });
 
+storeSchema.index({
+    location: '2dsphere'
+});
+
 storeSchema.pre('save', async function(next) {
     if(!this.isModified('name')){
         next(); //skip it
@@ -59,7 +63,6 @@ storeSchema.pre('save', async function(next) {
         this.slug = `${this.slug}-${storesWithSlug.length + 1}`;
     }
     next();
-    //TODO make more resiliant so slugs are unique
 });
 
 storeSchema.pre('findOneAndUpdate', async function(next){
