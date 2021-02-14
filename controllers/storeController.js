@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Store = mongoose.model('Store');
+const User = mongoose.model('User');
 const multer = require('multer');
 const jimp = require('jimp');
 const uuid = require('uuid');
@@ -146,3 +147,20 @@ exports.mapStores = async (req, res) => {
 exports.mapPage = (req, res) => {
     res.render('map', {title: 'Map'});
 }
+
+exports.heartStore = async (req, res) => {
+    const hearts = req.user.hearts.map(obj => obj.toString()); // grab the list of hearts of the currently logged in user
+    const operator = hearts.includes(req.params.id) ? '$pull' : '$addToSet'; // check if the id of the store is already present in the hearts array of that user if it is remove it from there, if it isn't add it to the array
+    const user = await User.findByIdAndUpdate(req.user._id,  // get the current user from the database
+        { [operator]: { hearts: req.params.id }}, // use the operator variable from the next line to either add or remove the id from their hearts array
+        { new: true } // return the newly updated user... by default it would have send back the previous state of the user
+    );
+    res.json(user);
+};
+
+exports.getHearts = async (req, res) => {
+    const stores = await Store.find({
+        _id: { $in: req.user.hearts }  // find the stores of which their id are present in the users list of hearts
+    });
+    res.render('stores', {title: 'Hearted Stores', stores})
+};
